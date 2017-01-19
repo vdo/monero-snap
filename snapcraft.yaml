@@ -1,0 +1,44 @@
+name: monero
+version: "0.10.1"
+summary: Monero Daemon
+description: The secure, private, untraceable cryptocurrency
+confinement: strict
+
+apps:
+  monerod:
+    command: monerod
+
+parts:
+  monerod:
+    plugin: make
+    source: https://github.com/monero-project/monero/archive/v0.10.1.tar.gz
+    build-packages:
+      - gcc 
+      - g++
+      - cmake
+      - libboost-all-dev 
+      - libdb5.3-dev
+      - libunbound-dev
+      - libunwind8-dev
+      - libssl-dev
+
+  monero-core:
+    plugin: qmake
+    source: https://github.com/monero-project/monero-core/archive/v0.0-beta-1.tar.gz
+    build: |
+      ./build.sh
+    after: 
+      - monerod
+    build-packages:
+      - qtbase5-dev 
+      - qt5-default 
+      - qtdeclarative5-dev 
+      - qml-module-qtquick-controls 
+      - qml-module-qtquick-xmllistmodel 
+      - qttools5-dev-tools 
+      - qml-module-qtquick-dialogs 
+      - qml-module-qt-labs-settings 
+      - libqt5qml-graphicaleffects
+
+
+

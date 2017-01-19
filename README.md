@@ -1,1 +1,1 @@
-# monero-snap
+# monero-snap config user.name vdo
