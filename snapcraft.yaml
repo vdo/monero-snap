@@ -19,9 +19,12 @@ parts:
   monero:
     plugin: make
     source: https://github.com/monero-project/monero/archive/v0.10.1.tar.gz
+    filesets:
+      binaries:
+        - build/release/bin/*
     artifacts:
       - build/release/lib/libwallet.a
-      - build/release/bin/*
+      - $binaries
     build-packages:
       - gcc 
       - g++
