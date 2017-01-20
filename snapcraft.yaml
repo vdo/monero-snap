@@ -39,16 +39,19 @@ parts:
 
   monero-core:
     plugin: qmake
-    qt-version: qt5
+      qt-version: qt5
+      options:
+        - release
+        - libunwind_off
+      project-files: build/monero-wallet-gui.pro
     source: https://github.com/monero-project/monero-core/archive/v0.0-beta-1.tar.gz
-    build: |
-      ./build.sh
     install: | 
       mv ./release/bin/monero-wallet-gui $SNAPCRAFT_PART_INSTALL/bin/
     after: 
       - monero
       - desktop-qt5
     build-packages:
+      - pkg-config
       - qtbase5-dev 
       - qtdeclarative5-dev 
       - qttools5-dev-tools 
