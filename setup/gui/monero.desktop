@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Monero
+Comment=Monero GUI Wallet
+Icon=${SNAP}/meta/gui/icon.png
+Exec=monero-wallet-gui
+Terminal=false
+Categories=Network;
