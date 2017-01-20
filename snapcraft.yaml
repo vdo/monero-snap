@@ -19,9 +19,9 @@ parts:
   monero:
     plugin: make
     source: https://github.com/monero-project/monero/archive/v0.10.1.tar.gz
-    install: | 
-      mv ./build/release/bin/* $SNAPCRAFT_PART_INSTALL/bin/
-      cd ./build/release/src/wallet && make install
+    artifacts:
+      - build/release/lib/libwallet.a
+      - /build/release/bin/*
     build-packages:
       - gcc 
       - g++
