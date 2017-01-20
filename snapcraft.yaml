@@ -34,6 +34,7 @@ parts:
 
   monero-core:
     plugin: qmake
+    qt-version: qt5
     source: https://github.com/monero-project/monero-core/archive/v0.0-beta-1.tar.gz
     build: |
       ./build.sh
