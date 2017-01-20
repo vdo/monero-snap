@@ -21,7 +21,7 @@ parts:
     source: https://github.com/monero-project/monero/archive/v0.10.1.tar.gz
     artifacts:
       - build/release/lib/libwallet.a
-      - /build/release/bin/*
+      - build/release/bin/*
     build-packages:
       - gcc 
       - g++
