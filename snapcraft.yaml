@@ -43,7 +43,7 @@ parts:
     options:
       - release
       - libunwind_off
-    project-files: build/monero-wallet-gui.pro
+    project-files: [build/monero-wallet-gui.pro]
     source: https://github.com/monero-project/monero-core/archive/v0.0-beta-1.tar.gz
     install: | 
       mv ./release/bin/monero-wallet-gui $SNAPCRAFT_PART_INSTALL/bin/
