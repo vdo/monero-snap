@@ -1,64 +1,113 @@
 name: monero
-version: "0.10.1"
-summary: Monero Daemon and GUI
-description: The secure, private, untraceable cryptocurrency
+version: 0.10.1~beta
+summary: "Monero: the secure, private, untraceable cryptocurrency https://getmonero.org"
+description: |
+    Monero is a private, secure, untraceable, decentralised digital currency.
+    You are your bank, you control your funds, and nobody can trace your transfers
+    unless you allow them to do so.
+grade: devel
 confinement: strict
 
 apps:
-  monerod:
-    command: monerod
-    plugs: [network-bind,network,home]
-  monero-wallet-cli:
-    command: monero-wallet-cli
-    plugs: [network,home]
-  monero-wallet-gui:
-    command: monero-wallet-gui
-    plugs: [x11,home]
+    monerod:
+        daemon: forking
+        command: |
+          monerod --detach --data-dir ${SNAP_DATA}
+        plugs:
+            - network
+            - network-bind
+    monero-wallet-gui:
+        command: |
+            monero-wallet-gui
+        plugs:
+            - x11
+            - unity7
+            - home
+            - network
+    monero-wallet-cli:
+        command: |
+            monero-wallet-cli --log-file ${SNAP_USER_DATA}
+        plugs:
+            - home
+            - network
 
 parts:
-  monero:
-    plugin: make
-    source: https://github.com/monero-project/monero/archive/v0.10.1.tar.gz
-    filesets:
-      libs:
-      - build/release/lib/libwallet.a
-    artifacts:
-      - build/release/bin/monerod
-      - build/release/bin/monero-wallet-cli
-    stage:
-      - $libs
-    build-packages:
-      - gcc 
-      - g++
-      - cmake
-      - libboost-all-dev 
-      - libdb5.3-dev
-      - libunbound-dev
-      - libunwind8-dev
-      - libssl-dev
+    cmake-build:
+        plugin: cmake
+        configflags:
+            - -DBDB_STATIC=1
+            - -DUPNP_STATIC=1
+            - -DBoost_USE_STATIC_LIBS=1
+            - -DBoost_USE_STATIC_RUNTIME=1
+            - -DBUILD_GUI_DEPS=ON
+            - -DARCH=default
+        source: git://github.com/monero-project/monero.git
+        source-commit: 16b8b66a
+        build-packages:
+            - gcc
+            - pkg-config
+            - libunbound-dev
+            - libevent-dev
+            - libboost-all-dev
+            - libdb-dev
+            - libunwind-dev
+            - libminiupnpc-dev
+            - libldns-dev
+            - libexpat1-dev
+            - bison
+            - doxygen
+            - graphviz
+        stage-packages:
+            - libminiupnpc10
+            - libunbound2
+            - libunwind8
+        prime:
+            - bin/*
+            - lib/*
+            - usr/lib/*
+            - usr/include/*
+            - -usr/lib/gcc
+            - -usr/share
 
-  monero-core:
-    plugin: qmake
-    qt-version: qt5
-    options:
-      - release
-      - libunwind_off
-    project-files: [build/monero-wallet-gui.pro]
-    source: https://github.com/monero-project/monero-core/archive/v0.0-beta-1.tar.gz
-    install: | 
-      mv ./release/bin/monero-wallet-gui $SNAPCRAFT_PART_INSTALL/bin/
-    after: 
-      - monero
-      - desktop-qt5
-    build-packages:
-      - pkg-config
-      - qtbase5-dev 
-      - qtdeclarative5-dev 
-      - qttools5-dev-tools 
-    stage-packages:
-      - qml-module-qtquick-controls 
-      - qml-module-qtquick-xmllistmodel 
-      - qml-module-qtquick-dialogs 
-      - qml-module-qt-labs-settings 
-      - libqt5qml-graphicaleffects
-
+    monero-core:
+      plugin: qmake
+      qt-version: qt5 
+      source: git://github.com/monero-project/monero-core.git
+      source-branch: master
+      prepare: |
+        make -C src/zxcvbn-c
+        echo "var GUI_VERSION = \"$(git rev-parse --short HEAD)\"" > version.js
+        echo "var GUI_MONERO_VERSION = \"$16b8b66a\"" >> version.js
+      build: |
+        # The Ghetto Way
+        export PATH=/usr/lib/$(uname -m)-linux-gnu/qt5/bin/:$PATH
+        mkdir monero/lib
+        cp $SNAPCRAFT_STAGE/lib/* monero/lib/
+        mkdir -p build/; cd build
+        #qmake ../monero-wallet-gui.pro CONFIG+="libunwind_off"
+        qmake ../monero-wallet-gui.pro
+        make 
+      install: |
+        mkdir $SNAPCRAFT_PART_INSTALL/bin
+        mv -v build/release/bin/* $SNAPCRAFT_PART_INSTALL/bin/
+      after: 
+        - desktop-qt5
+        - cmake-build
+      build-packages:
+        - libssl-dev
+        - qtbase5-dev 
+        - qtdeclarative5-dev 
+        - qttools5-dev-tools 
+      stage-packages:
+        - qml-module-qtquick-controls 
+        - qml-module-qtquick-xmllistmodel 
+        - qml-module-qtquick-dialogs 
+        - qml-module-qt-labs-settings 
+        - libqt5qml-graphicaleffects
+      prime:
+        - bin/monero-wallet-gui
+        - -usr/sbin
+        - -usr/share/themes
+        - -usr/share/icons
+        - -usr/share/doc
+        - -usr/share/locale
